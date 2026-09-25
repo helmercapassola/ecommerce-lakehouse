@@ -1,0 +1,15 @@
+# =============================================================
+# Bundle do Pipeline de E-commerce (camada silver)
+# Catálogo: ecommerce | Schema padrão: silver
+# Perfil CLI: imersao
+# =============================================================
+
+bundle:
+  name: ecommerce_pipeline
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development

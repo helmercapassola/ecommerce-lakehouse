@@ -1,0 +1,46 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# AWS credentials
+.aws/
+credentials
+*.pem
+*.key
+
+# Databricks internal state
+.databricks/bundle/
+.bundle/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Data files (not published to GitHub)
+*.parquet
+*.csv
+*.delta/
+*.dat
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+
+# Dashboard export artifacts (large JSON, regenerated from SDK)
+# Uncomment to exclude:
+# *.lvdash.json

@@ -1,0 +1,43 @@
+bundle:
+  name: ecommerce_dashboards
+
+variables:
+  warehouse_id:
+    description: "SQL Warehouse ID"
+    default: "0ab33db7097d6231"
+  catalog_name:
+    description: "Unity Catalog catalog"
+    default: "ecommerce"
+  schema_name:
+    description: "Unity Catalog schema"
+    default: "gold"
+
+targets:
+  dev:
+    mode: development
+    default: true
+  prod:
+    mode: production
+
+sync:
+  exclude:
+    - "*.lvdash.json"
+
+resources:
+  dashboards:
+    vendas_ecommerce:
+      file_path: src/dashboards/vendas_ecommerce.lvdash.json
+      display_name: "Vendas E-commerce - Visão Executiva"
+      warehouse_id: ${var.warehouse_id}
+    diretoria_comercial:
+      file_path: src/dashboards/diretoria_comercial.lvdash.json
+      display_name: "Diretoria Comercial"
+      warehouse_id: ${var.warehouse_id}
+    diretoria_customer_success:
+      file_path: src/dashboards/diretoria_customer_success.lvdash.json
+      display_name: "Diretoria de Customer Success"
+      warehouse_id: ${var.warehouse_id}
+    diretoria_pricing:
+      file_path: src/dashboards/diretoria_pricing.lvdash.json
+      display_name: "Diretoria de Pricing"
+      warehouse_id: ${var.warehouse_id}

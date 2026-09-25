@@ -1,0 +1,752 @@
+{
+  "datasets": [
+    {
+      "name": "mais_caros",
+      "displayName": "Produtos Mais Caros (Top 20)",
+      "queryLines": [
+        "SELECT\n",
+        "  id_produto,\n",
+        "  nome_produto,\n",
+        "  categoria,\n",
+        "  marca,\n",
+        "  nosso_preco,\n",
+        "  preco_medio_concorrentes,\n",
+        "  preco_maximo_concorrentes,\n",
+        "  diferenca_pct_vs_media,\n",
+        "  classificacao_preco,\n",
+        "  receita,\n",
+        "  itens_vendidos\n",
+        "FROM\n",
+        "  precos_competitividade\n",
+        "WHERE\n",
+        "  classificacao_preco = 'MAIS_CARO_QUE_TODOS'\n",
+        "ORDER BY\n",
+        "  receita DESC\n",
+        "LIMIT 20"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "precos_competitividade",
+      "displayName": "Preços e Competitividade",
+      "queryLines": [
+        "SELECT\n",
+        "  *,\n",
+        "  CASE\n",
+        "    WHEN\n",
+        "      classificacao_preco = 'MAIS_CARO_QUE_TODOS'\n",
+        "      AND NOT possui_preco_suspeito\n",
+        "    THEN\n",
+        "      1\n",
+        "    ELSE 0\n",
+        "  END AS is_mais_caro_confirmado,\n",
+        "  CASE\n",
+        "    WHEN possui_preco_suspeito THEN 1\n",
+        "    ELSE 0\n",
+        "  END AS is_suspeito\n",
+        "FROM\n",
+        "  precos_competitividade"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    }
+  ],
+  "pages": [
+    {
+      "name": "b096f9bf",
+      "displayName": "Pricing",
+      "layout": [
+        {
+          "widget": {
+            "name": "subtitle",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Análise de Competitividade de Preços\n",
+                "Fonte: ecommerce.gold.precos_competitividade | Período: 13/12/2025 a 11/01/2026"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_produtos_monitorados",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "countdistinct(id_produto)",
+                      "expression": "COUNT(DISTINCT `id_produto`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Produtos Monitorados"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(id_produto)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_mais_caros_confirmados",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "sum(is_mais_caro_confirmado)",
+                      "expression": "SUM(`is_mais_caro_confirmado`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Mais Caros Confirmados"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(is_mais_caro_confirmado)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 1,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_receita_total",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "sum(receita)",
+                      "expression": "SUM(`receita`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Receita Total"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(receita)",
+                  "format": {
+                    "type": "number-currency",
+                    "abbreviation": "none",
+                    "currencyCode": "BRL",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 1,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_precos_suspeitos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "sum(is_suspeito)",
+                      "expression": "SUM(`is_suspeito`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Preços Suspeitos"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(is_suspeito)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 1,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "chart_produtos_classificacao",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "classificacao_preco",
+                      "expression": "`classificacao_preco`"
+                    },
+                    {
+                      "name": "countdistinct(id_produto)",
+                      "expression": "COUNT(DISTINCT `id_produto`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Produtos por Classificação"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "classificacao_preco",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "countdistinct(id_produto)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "classificacao_preco",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "chart_diff_pct_categoria",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "categoria",
+                      "expression": "`categoria`"
+                    },
+                    {
+                      "name": "avg(diferenca_pct_vs_media)",
+                      "expression": "AVG(`diferenca_pct_vs_media`)"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "AVG(`diferenca_pct_vs_media`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Diferença % vs Média por Categoria"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "avg(diferenca_pct_vs_media)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "formatTemplate": "{{ @formatted }}%",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "categoria",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "avg(diferenca_pct_vs_media)"
+                      }
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "categoria",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 3,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "chart_receita_classificacao",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "classificacao_preco",
+                      "expression": "`classificacao_preco`"
+                    },
+                    {
+                      "name": "sum(receita)",
+                      "expression": "SUM(`receita`)"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "SUM(`receita`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Receita por Classificação"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(receita)",
+                  "format": {
+                    "type": "number-currency",
+                    "abbreviation": "none",
+                    "currencyCode": "BRL",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "classificacao_preco",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "sum(receita)"
+                      }
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "classificacao_preco",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 12,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "table_mais_caros",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "mais_caros",
+                  "fields": [
+                    {
+                      "name": "nome_produto",
+                      "expression": "`nome_produto`"
+                    },
+                    {
+                      "name": "categoria",
+                      "expression": "`categoria`"
+                    },
+                    {
+                      "name": "marca",
+                      "expression": "`marca`"
+                    },
+                    {
+                      "name": "nosso_preco",
+                      "expression": "`nosso_preco`"
+                    },
+                    {
+                      "name": "preco_medio_concorrentes",
+                      "expression": "`preco_medio_concorrentes`"
+                    },
+                    {
+                      "name": "diferenca_pct_vs_media",
+                      "expression": "`diferenca_pct_vs_media`"
+                    },
+                    {
+                      "name": "receita",
+                      "expression": "`receita`"
+                    },
+                    {
+                      "name": "itens_vendidos",
+                      "expression": "`itens_vendidos`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Produtos Mais Caros que Todos os Concorrentes"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "nome_produto",
+                    "displayName": "Produto"
+                  },
+                  {
+                    "fieldName": "categoria",
+                    "displayName": "Categoria"
+                  },
+                  {
+                    "fieldName": "marca",
+                    "displayName": "Marca"
+                  },
+                  {
+                    "fieldName": "nosso_preco",
+                    "format": {
+                      "type": "number-currency",
+                      "abbreviation": "none",
+                      "currencyCode": "BRL",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      }
+                    },
+                    "contentAlignment": "right",
+                    "displayName": "Nosso Preço"
+                  },
+                  {
+                    "fieldName": "preco_medio_concorrentes",
+                    "format": {
+                      "type": "number-currency",
+                      "abbreviation": "none",
+                      "currencyCode": "BRL",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      }
+                    },
+                    "contentAlignment": "right",
+                    "displayName": "Preço Médio Concorrentes"
+                  },
+                  {
+                    "fieldName": "diferenca_pct_vs_media",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      }
+                    },
+                    "contentAlignment": "right",
+                    "displayName": "Dif. % vs Média",
+                    "formatTemplate": "{{ @formatted }}%"
+                  },
+                  {
+                    "fieldName": "receita",
+                    "format": {
+                      "type": "number-currency",
+                      "abbreviation": "none",
+                      "currencyCode": "BRL",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 2
+                      }
+                    },
+                    "contentAlignment": "right",
+                    "displayName": "Receita"
+                  },
+                  {
+                    "fieldName": "itens_vendidos",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none"
+                    },
+                    "contentAlignment": "right",
+                    "displayName": "Itens Vendidos"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "global_filters",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "filtro_categoria",
+            "queries": [
+              {
+                "name": "dashboards/01f1b8ef948b1974b6f7e6f43a5dd20d/datasets/01f1b8efdbcf1e5ca64a557a071f0e34_categoria",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "categoria",
+                      "expression": "`categoria`"
+                    },
+                    {
+                      "name": "categoria_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Categoria"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "categoria",
+                    "queryName": "dashboards/01f1b8ef948b1974b6f7e6f43a5dd20d/datasets/01f1b8efdbcf1e5ca64a557a071f0e34_categoria"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_classificacao",
+            "queries": [
+              {
+                "name": "dashboards/01f1b8ef948b1974b6f7e6f43a5dd20d/datasets/01f1b8efdbcf1e5ca64a557a071f0e34_classificacao_preco",
+                "query": {
+                  "datasetName": "precos_competitividade",
+                  "fields": [
+                    {
+                      "name": "classificacao_preco",
+                      "expression": "`classificacao_preco`"
+                    },
+                    {
+                      "name": "classificacao_preco_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Classificação de Preço"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "classificacao_preco",
+                    "queryName": "dashboards/01f1b8ef948b1974b6f7e6f43a5dd20d/datasets/01f1b8efdbcf1e5ca64a557a071f0e34_classificacao_preco"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

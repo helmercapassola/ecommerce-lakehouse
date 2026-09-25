@@ -1,0 +1,29 @@
+# Pipeline da camada silver do e-commerce
+# Catálogo: ecommerce | Schema: silver | Serverless: true
+
+resources:
+  pipelines:
+    ecommerce_silver:
+      name: "New Pipeline 2026-09-24 21:10"
+      catalog: ecommerce
+      schema: silver
+      serverless: true
+      photon: true
+      channel: CURRENT
+      libraries:
+        - file:
+            path: ../transformations/silver/produtos.py
+        - file:
+            path: ../transformations/silver/clientes.py
+        - file:
+            path: ../transformations/silver/preco_competidores.py
+        - file:
+            path: ../transformations/silver/vendas.py
+        - file:
+            path: ../transformations/gold/vendas_diarias.sql
+        - file:
+            path: ../transformations/gold/vendas_por_produto.sql
+        - file:
+            path: ../transformations/gold/vendas_por_cliente.sql
+        - file:
+            path: ../transformations/gold/clientes_segmentacao.sql
