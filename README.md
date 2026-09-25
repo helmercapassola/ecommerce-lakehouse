@@ -388,6 +388,7 @@ ecommerce-lakehouse/
 | Delta Lake | Tabelas transacionais na camada Bronze |
 | DAB | Deploy do pipeline e dos dashboards |
 | Databricks SDK | Export de dashboards via Lakeview API |
+| Genie Space | Agente de IA para consultas em linguagem natural |
 
 ## Security
 
@@ -416,6 +417,8 @@ Este projeto utiliza **variáveis de ambiente** para todas as credenciais. Nunca
 * **Alerting**: Configurar alertas automáticos para falhas nos testes de qualidade
 * **CI/CD**: Pipeline GitOps com validação automática do bundle antes do deploy
 * **Row-level security**: Implementar RLS na camada Gold por diretoria
+* **Genie benchmarks**: Adicionar benchmarks automaticos para validar respostas do Genie Space
+* **Genie knowledge snippets**: Adicionar snippets de conhecimento para joins e metricas complexas
 
 > Estas são melhorias futuras sugeridas, não funcionalidades já implementadas.
 
