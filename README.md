@@ -309,8 +309,82 @@ DAB separado para deploy dos 4 dashboards AI/BI:
 * Classificações: ACIMA_DA_MEDIA=92, ABAIXO_DA_MEDIA=76, NA_MEDIA=6, MAIS_BARATO_QUE_TODOS=6
 
 ### Dashboards
-* 4 dashboards AI/BI publicados (Visão Executiva, Comercial, Customer Success, Pricing)
-* Genie Space para consultas em linguagem natural
+
+#### Vendas E-commerce - Visao Executiva
+![Dashboard Vendas E-commerce](images/dashboard-vendas-ecommerce.png)
+
+* KPIs: Receita Total, Total de Vendas, Ticket Medio, Vendas E-commerce
+* 3 paginas: Visao Geral, Analise Detalhada, Segmentacao de Clientes
+* 6 filtros globais: canal, regiao, categoria, data, marca, segmento
+
+#### Diretoria Comercial
+![Dashboard Comercial](images/dashboard-comercial.png)
+
+* KPIs: Produtos Cadastrados, Categorias, Receita Total, Itens Vendidos
+* Analises: Top produtos, receita por categoria/marca, itens por categoria
+* Filtros globais: categoria, marca
+
+#### Diretoria de Customer Success
+![Dashboard Customer Success](images/dashboard-customer-success.png)
+
+* KPIs: Total Clientes, Clientes VIP, % Receita VIP, Ticket Medio VIP
+* Analises: Receita por regiao, clientes por segmento, ranking VIP
+* Filtros globais: segmento, regiao
+
+#### Diretoria de Pricing
+![Dashboard Pricing](images/dashboard-pricing.png)
+
+* KPIs: Produtos Monitorados, Mais Caros Confirmados, Receita Total, Precos Suspeitos
+* Analises: Classificacao de precos, diferenca vs media/concorrentes, ranking
+* Filtros globais: categoria, classificacao
+
+> **Nota**: Os dashboards sao deployados no Databricks via Declarative Automation Bundle (DAB).
+> Para reproduzir num workspace Databricks, ver `dashboards/DEPLOY_GUIDE.md`.
+> Os screenshots acima representam o estado dos dashboards no periodo de 13/12/2025 a 11/01/2026.
+
+## AI Agents
+
+### Genie Space
+
+O projeto inclui um **Genie Space** ("E-commerce Sales and Pricing Analytics") no Databricks que funciona como agente de IA para analise de dados. Permite que usuarios facam perguntas em linguagem natural (portugues) e recebam respostas com SQL gerado automaticamente, sem necessidade de conhecimento de SQL.
+
+#### Como funciona
+
+1. O usuario escreve uma pergunta em portugues (ex: "Qual o produto com maior receita?")
+2. O Genie traduz a pergunta em SQL usando os metadados das tabelas Gold
+3. O SQL e executado contra as tabelas `ecommerce.gold.*`
+4. O resultado e devolvido com a query SQL visivel para auditoria
+
+#### Tabelas disponiveis no Genie Space
+
+| Tabela | Diretoria | Uso no Genie |
+| --- | --- | --- |
+| `gold.clientes_segmentacao` | Customer Success | Segmentacao VIP/TOP_TIER/REGULAR, ranking de receita |
+| `gold.vendas_detalhadas` | Comercial | Analise granular por venda, filtros cruzados |
+| `gold.vendas_diarias` | Comercial | Tendencia diaria por canal |
+| `gold.vendas_por_produto` | Comercial | Desempenho por produto |
+| `gold.vendas_por_cliente` | Customer Success | Comportamento de compra por cliente |
+| `gold.vendas_produtos` | Comercial | Rankings de produtos por receita |
+| `gold.vendas_temporais` | Comercial | Analise temporal (dia, hora, canal) |
+| `gold.precos_competitividade` | Pricing | Comparacao de precos vs concorrentes |
+
+#### Qualidade dos metadados
+
+Todas as tabelas Gold incluem comentarios detalhados em cada coluna (via `COMMENT` no SQL), que o Genie usa para:
+* Entender o significado de cada coluna
+* Aplicar filtros corretos (ex: "segmento_cliente so pode ser VIP, TOP_TIER ou REGULAR")
+* Evitar erros comuns (ex: "nao somar clientes_unicos entre linhas")
+* Conhecer limites de negocio (ex: "VIP = receita >= R$ 22.000")
+
+#### Exemplos de perguntas
+
+* "Qual a receita total por regiao?"
+* "Quais os 10 produtos mais vendidos?"
+* "Quantos clientes VIP existem e qual sua receita total?"
+* "Em quais produtos somos mais caros que todos os concorrentes?"
+* "Qual o ticket medio por canal de venda?"
+* "Qual o melhor horario para vendas no e-commerce?"
+* "Qual a receita suspeita por dia?"
 
 ## Project Structure
 
@@ -371,6 +445,12 @@ ecommerce-lakehouse/
 │
 └── docs/
     └── data-quality.md             # Análise de qualidade Bronze
+│
+└ images/                         # Screenshots dos dashboards
+    ├ dashboard-vendas-ecommerce.png
+    ├ dashboard-comercial.png
+    ├ dashboard-customer-success.png
+    └ dashboard-pricing.png
 ```
 
 ## Technologies
@@ -388,6 +468,7 @@ ecommerce-lakehouse/
 | Delta Lake | Tabelas transacionais na camada Bronze |
 | DAB | Deploy do pipeline e dos dashboards |
 | Databricks SDK | Export de dashboards via Lakeview API |
+| Genie Space | Agente de IA para consultas em linguagem natural |
 | Genie Space | Agente de IA para consultas em linguagem natural |
 
 ## Security
@@ -417,6 +498,8 @@ Este projeto utiliza **variáveis de ambiente** para todas as credenciais. Nunca
 * **Alerting**: Configurar alertas automáticos para falhas nos testes de qualidade
 * **CI/CD**: Pipeline GitOps com validação automática do bundle antes do deploy
 * **Row-level security**: Implementar RLS na camada Gold por diretoria
+* **Genie benchmarks**: Adicionar benchmarks automaticos para validar respostas do Genie Space
+* **Genie knowledge snippets**: Adicionar snippets de conhecimento para joins e metricas complexas
 * **Genie benchmarks**: Adicionar benchmarks automaticos para validar respostas do Genie Space
 * **Genie knowledge snippets**: Adicionar snippets de conhecimento para joins e metricas complexas
 
